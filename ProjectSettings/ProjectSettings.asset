@@ -926,11 +926,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 19a67da9-54d0-4d2a-8074-be3fa785b08b
+  cloudProjectId: e9b3b9b3-bacc-49c1-a77f-c2386e010b86
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 2026 - TADD4 - Fuera del bucle
-  organizationId: unity_5de6ef73a1261c0b221b
+  projectName: Fuera del Bucle v2
+  organizationId: unity_b3f94aa7826096795503
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
