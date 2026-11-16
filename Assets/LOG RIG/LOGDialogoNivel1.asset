@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcebe531d811c6a48a2ffeba6770ed6b, type: 3}
+  m_Name: LOGDialogoNivel1
+  m_EditorClassIdentifier: Assembly-CSharp::NPCDialogos
+  NombreNPC: LOG
+  LogRetrato: {fileID: 21300000, guid: c3f26dad6b09422999ba6e5a25facc1b, type: 3}
+  retratosPorLinea:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 21300000, guid: 476500c0e424e114b9bf1b86ed5d2ff8, type: 3}
+  - {fileID: 21300000, guid: 476500c0e424e114b9bf1b86ed5d2ff8, type: 3}
+  escalaRetratoPorLinea:
+  - 1
+  - 1
+  - 1.28
+  - 1.28
+  desplazamientoRetratoPorLinea:
+  - 0
+  - 0
+  - 14.07
+  - 14.07
+  lineasDialogo:
+  - "Anomal\xEDa detectada... No temas, no voy a reportarte. Mi funci\xF3n es registrar
+    datos, no juzgarlos. Y debo admitir que tu presencia ha introducido una variable
+    que este sistema no hab\xEDa experimentado en mucho tiempo."
+  - "Para desplazarte por esta zona, utiliza [A] y [D] para modificar tu posici\xF3n
+    horizontal. [Espacio] ejecutar\xE1 la funci\xF3n de salto. Procura no romper
+    m\xE1s reglas de las estrictamente necesarias."
+  - "Precauci\xF3n. M\xE1s adelante encontrar\xE1s unidades Repeater. Sus disparos
+    siguen intervalos fijos y predecibles. Observa el patr\xF3n, calcula el momento
+    adecuado y evita los proyectiles."
+  - "Los Repeaters mantienen el orden. Detectan movimiento y disparan en un ciclo
+    fijo. No piensan. No cambian. Solo repiten. Observ\xE1 su patr\xF3n y el sistema
+    ser\xE1 predecible."
+  autoProgresLineas: 01010101
+  autoProgresDelay: 1.5
+  velocidadTypeo: 0.03
+  sonidoVoz: {fileID: 0}
+  pitchVoz: 1

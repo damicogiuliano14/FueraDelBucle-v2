@@ -1,0 +1,554 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class PlayerPhysics : MonoBehaviour
+{
+    public static bool godModeActivo = false;
+    [Header("Configuración de Caída")]
+    [SerializeField] private float multiplicadorCaida = 2.5f;
+
+    [Header("Detección de Suelo")]
+    [SerializeField] private Transform detectorSuelo;
+    [SerializeField] private float radioDeteccion = 0.2f;
+    [SerializeField] private LayerMask capaPlataformas;
+
+    [Header("Movimiento")]
+    [SerializeField] private float velocidadMovimiento = 5f;
+    [SerializeField] private float velocidadAgachado = 2.5f;
+
+    [Header("Salto")]
+    [SerializeField] private float fuerzaSalto = 8f;
+    [Tooltip("Gravedad durante la subida. Mayor a 1 = llega al punto más alto más rápido, sin cambiar la altura del salto.")]
+    [SerializeField] private float multiplicadorSubida = 2f;
+
+    [Header("Dash")]
+    [SerializeField] private float fuerzaDash = 15f;
+    [SerializeField] private float duracionDash = 0.2f;
+    [SerializeField] private float cooldownDash = 1f;
+    [SerializeField] private float velocidadCaidaDespuesDash = 2f;
+    [SerializeField] private AudioClip sonidoDash;
+
+    [Header("Habilidad Phase (Traspasar Paredes)")]
+    [SerializeField] private KeyCode teclaPhase = KeyCode.P;
+    [SerializeField] private float cooldownPhase = 4f;
+    [Tooltip("Cuánto puede durar el Phase como máximo. Al agotarse se corta solo y arranca el cooldown.")]
+    [SerializeField] private float duracionPhase = 3f;
+    [SerializeField] private LayerMask capaParedesAtravesables;
+    [SerializeField] private float opacidadPhase = 0.7f; // Transparencia visual durante el Phase
+    [Tooltip("Color del leve glow violeta que tiñe el sprite mientras dura el Phase.")]
+    [SerializeField] private Color colorGlowPhase = new Color(0.65f, 0.35f, 1f);
+    [Tooltip("Qué tan rápido pulsa el brillo del glow.")]
+    [SerializeField] private float velocidadPulsoGlow = 4f;
+    [Tooltip("Qué tan fuerte es la variación de brillo del pulso (0 = sin pulso).")]
+    [SerializeField] private float intensidadPulsoGlow = 0.25f;
+    [Tooltip("Número de nivel a partir del cual se puede usar Phase (según el nombre de escena \"NivelX\"). Escenas que no siguen ese formato (ej. SampleScene) la tienen habilitada.")]
+    [SerializeField] private int nivelMinimoParaPhase = 6;
+
+    [Header("Sprite")]
+    [Tooltip("Marcá esto si el personaje mira hacia la derecha con escala X positiva. Desmarcá si mira a la izquierda.")]
+    [SerializeField] private bool spriteMiraDerecha = true;
+    [Tooltip("Objeto que se gira al cambiar de direccion. Si lo dejás vacío se usa este mismo GameObject " +
+             "(la raíz del rig). Se invierte su escala en X: espeja todo el rig sin cambiar su tamaño.")]
+    [SerializeField] private Transform visualAGirar;
+
+    private Rigidbody2D rb;
+    private Animator anim;
+    private Collider2D colisionadorJugador;
+    private SpriteRenderer[] spriteRenderers;
+    private VidaJugador vidaJugador;
+    private Transform transformAGirar;
+    private Vector3 escalaAGirarInicial;
+    private bool estaEnElSuelo;
+    private float inputHorizontal;
+    private bool quiereSaltar;
+
+    private bool estaDasheando;
+    private float tiempoRestanteDash;
+    private float tiempoRestanteCooldown;
+    private float direccionDash;
+
+    // Variables Phase
+    private bool estaEnPhase = false;
+    private float tiempoRestantePhase;
+    private float tiempoRestanteCooldownPhase;
+    private Color[] coloresOriginalesPhase;
+    private bool phaseDisponibleEnEsteNivel = true;
+
+    private bool estaAgachado;
+    private BoxCollider2D boxCollider;
+    private Vector2 tamanoOriginalCollider;
+    private Vector2 offsetOriginalCollider;
+
+    // ---- Propiedades públicas para la UI ----
+    public float ProgresoCooldownDash
+    {
+        get
+        {
+            if (cooldownDash <= 0f) return 1f;
+            return 1f - Mathf.Clamp01(tiempoRestanteCooldown / cooldownDash);
+        }
+    }
+
+    public float ProgresoCooldownPhase
+    {
+        get
+        {
+            if (cooldownPhase <= 0f) return 1f;
+            return 1f - Mathf.Clamp01(tiempoRestanteCooldownPhase / cooldownPhase);
+        }
+    }
+
+    public float ProgresoDuracionPhase
+    {
+        get
+        {
+            if (duracionPhase <= 0f) return 0f;
+            return Mathf.Clamp01(tiempoRestantePhase / duracionPhase);
+        }
+    }
+
+    public bool EstaEnPhase => estaEnPhase;
+
+    public float TiempoRestanteCooldown => tiempoRestanteCooldown;
+    public bool PuedeDashear => tiempoRestanteCooldown <= 0f;
+    public bool PuedeHacerPhase => tiempoRestanteCooldownPhase <= 0f && !estaEnPhase && phaseDisponibleEnEsteNivel;
+    public bool EstaEnElSuelo => estaEnElSuelo;
+    public float MultiplicadorCaida => multiplicadorCaida;
+    public LayerMask CapaPlataformas => capaPlataformas;
+
+
+    [Header("Fuerza de Rebote sobre el enemigo")]
+    public float Rebote = 0f;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+
+        // La fisica corre a 50 Hz y la pantalla se dibuja a otro ritmo. Sin interpolacion el personaje avanza a saltitos
+        // y la camara que lo sigue lo corrige de golpe: se ve como una vibracion al caminar o saltar.
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+
+        anim = GetComponent<Animator>();
+        spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+        vidaJugador = GetComponent<VidaJugador>();
+        phaseDisponibleEnEsteNivel = CalcularSiPhaseEstaDisponible();
+
+        LimpiarPhaseDeEscenaAnterior();
+
+        colisionadorJugador = GetComponent<Collider2D>();
+        if (colisionadorJugador != null)
+        {
+            colisionadorJugador.sharedMaterial = new PhysicsMaterial2D("PlayerSinFriccion")
+            {
+                friction = 0f,
+                bounciness = 0f
+            };
+        }
+
+        boxCollider = colisionadorJugador as BoxCollider2D;
+        if (boxCollider != null)
+        {
+            tamanoOriginalCollider = boxCollider.size;
+            offsetOriginalCollider = boxCollider.offset;
+        }
+
+        transformAGirar = (visualAGirar != null) ? visualAGirar : transform;
+        escalaAGirarInicial = transformAGirar.localScale;
+    }
+
+    private void OnEnable()
+    {
+        if (estaEnPhase)
+        {
+            IgnorarColisionesParedes(true);
+        }
+    }
+
+    private void OnDisable()
+    {
+        IgnorarColisionesParedes(false);
+    }
+
+    private void LimpiarPhaseDeEscenaAnterior()
+    {
+        IgnorarColisionesParedes(false);
+    }
+
+    private void OrientarSprite()
+    {
+        if (inputHorizontal == 0f) return;
+
+        bool mirandoDerecha = inputHorizontal > 0f;
+        float signo = (mirandoDerecha == spriteMiraDerecha) ? 1f : -1f;
+
+        Vector3 escala = transformAGirar.localScale;
+        float objetivoX = Mathf.Abs(escalaAGirarInicial.x) * signo;
+        if (!Mathf.Approximately(escala.x, objetivoX))
+        {
+            escala.x = objetivoX;
+            transformAGirar.localScale = escala;
+        }
+    }
+
+    private Vector2 PuntoDeteccionSuelo()
+    {
+        float y = colisionadorJugador != null ? colisionadorJugador.bounds.min.y : detectorSuelo.position.y;
+        return new Vector2(transform.position.x, y);
+    }
+
+    // Las escenas de nivel se llaman "NivelX" (Nivel1, Nivel2, ...). Si el
+    // número es menor a nivelMinimoParaPhase, Phase queda bloqueado. Cualquier
+    // escena que no siga ese formato (ej. SampleScene) lo deja disponible.
+    private bool CalcularSiPhaseEstaDisponible()
+    {
+        string nombreEscena = SceneManager.GetActiveScene().name;
+        const string prefijo = "Nivel";
+
+        if (nombreEscena.StartsWith(prefijo))
+        {
+            string sufijo = nombreEscena.Substring(prefijo.Length);
+            if (int.TryParse(sufijo, out int numeroNivel))
+            {
+                return numeroNivel >= nivelMinimoParaPhase;
+            }
+        }
+
+        return true;
+    }
+
+    // Diálogo o placa de objetivo abiertos con el tiempo del juego detenido (Time.timeScale = 0): el jugador sigue sin
+    // moverse, pero se lo deja en Idle y se avanza el Animator a mano con el tiempo real. Sin esto no se actualizaba
+    // nada y quedaba congelado en la última pose (por ejemplo cayendo o saltando).
+    private void AnimarEnIdleConNivelPausado()
+    {
+        anim.SetBool("agachado", false);
+        anim.SetBool("mover", false);
+        anim.SetBool("enSuelo", false); // en el Animator "enSuelo" quiere decir "está en el aire"
+        anim.SetFloat("velocidadY", 0f);
+
+        anim.Update(Time.unscaledDeltaTime);
+    }
+
+    void Update()
+    {
+        if (Time.timeScale == 0f)
+        {
+            // El menú de pausa lo deja todo quieto como siempre; un diálogo o la placa de objetivo no.
+            if (!PauseManager.GameIsPaused && (DialogoLog.HayDialogoActivo || LevelUIManager.PlacaAbierta))
+            {
+                AnimarEnIdleConNivelPausado();
+            }
+
+            return;
+        }
+
+        // Placa de objetivo, caja de diálogo abierta o meta alcanzada: sin movimiento hasta que se cierre.
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            godModeActivo = !godModeActivo;
+            Debug.Log("God Mode: " + (godModeActivo ? "ACTIVADO" : "DESACTIVADO"));
+        }
+        // También queda quieto (en Idle) mientras dura el paneo de presentación de la cámara y el marco con video que le sigue.
+        if (LevelUIManager.PlacaAbierta || DialogoLog.HayDialogoActivo || PanelVictoria.MetaAlcanzada || CamaraSeguir.PaneoActivo || MarcoDesplegable.Activo)
+        {
+            inputHorizontal = 0f;
+
+            // El temporizador del dash corre en Update: si un dash quedara en curso
+            // (ej. diálogo final al tocar la meta) seguiría deslizando todo el diálogo.
+            estaDasheando = false;
+            quiereSaltar = false;
+
+            // La física sigue (si estaba en el aire cae y aterriza), así que se mantiene el
+            // Animator al día: sin esto quedaba clavado en la animación de salto/caminar
+            // en lugar de pasar a Idle.
+            estaEnElSuelo = Physics2D.OverlapCircle(PuntoDeteccionSuelo(), radioDeteccion, capaPlataformas);
+            estaAgachado = false;
+            AjustarColliderAgachado();
+
+            anim.SetBool("agachado", false);
+            anim.SetBool("mover", false);
+            anim.SetBool("enSuelo", !estaEnElSuelo);
+            anim.SetFloat("velocidadY", estaEnElSuelo ? 0f : rb.linearVelocity.y);
+            return;
+        }
+
+        estaEnElSuelo = Physics2D.OverlapCircle(PuntoDeteccionSuelo(), radioDeteccion, capaPlataformas);
+
+        if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) && estaEnElSuelo && !estaDasheando)
+        {
+            estaAgachado = true;
+        }
+        else
+        {
+            estaAgachado = false;
+        }
+
+        AjustarColliderAgachado();
+
+        anim.SetBool("agachado", estaAgachado);
+        anim.SetBool("enSuelo", !estaEnElSuelo);
+        anim.SetFloat("velocidadY", estaEnElSuelo ? 0f : rb.linearVelocity.y);
+
+        // Gravedad según la fase del salto
+        if (rb.linearVelocity.y > 0.01f && !estaEnElSuelo)
+        {
+            rb.gravityScale = multiplicadorSubida;
+        }
+        else if (rb.linearVelocity.y < 0f && !estaEnElSuelo)
+        {
+            rb.gravityScale = multiplicadorCaida;
+        }
+        else
+        {
+            rb.gravityScale = 1f;
+        }
+
+        // Movimiento horizontal
+        inputHorizontal = 0f;
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+        {
+            inputHorizontal = 1f;
+            anim.SetBool("mover", true);
+        }
+        else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+        {
+            inputHorizontal = -1f;
+            anim.SetBool("mover", true);
+        }
+        else
+        {
+            anim.SetBool("mover", false);
+        }
+
+        OrientarSprite();
+
+        // Salto
+        if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) && estaEnElSuelo && !estaAgachado)
+        {
+            quiereSaltar = true;
+        }
+
+        // Cooldown Dash
+        if (tiempoRestanteCooldown > 0f)
+        {
+            tiempoRestanteCooldown -= Time.deltaTime;
+        }
+
+        if (estaDasheando)
+        {
+            tiempoRestanteDash -= Time.deltaTime;
+
+            if (tiempoRestanteDash <= 0f)
+            {
+                estaDasheando = false;
+                rb.gravityScale = multiplicadorCaida;
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, -velocidadCaidaDespuesDash);
+            }
+        }
+
+        // Dash
+        if ((Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift) || Input.GetKeyDown(KeyCode.Tab))
+    && inputHorizontal != 0f && !estaDasheando && tiempoRestanteCooldown <= 0f && !estaAgachado)
+        {
+            estaDasheando = true;
+            Eventos.ContarDash();
+            tiempoRestanteDash = duracionDash;
+            tiempoRestanteCooldown = cooldownDash;
+            direccionDash = inputHorizontal;
+            anim.Play("DASH", 0, 0f);
+            //sonidoDash
+            if (sonidoDash != null)
+            {
+                Volumen.SonarEfecto(sonidoDash, 1f);
+            }
+        }
+
+        // Cooldown del Phase
+        if (tiempoRestanteCooldownPhase > 0f)
+        {
+            tiempoRestanteCooldownPhase -= Time.deltaTime;
+        }
+
+        // Activar: hay que APRETAR la tecla (no alcanza con mantenerla), y solo si no hay cooldown
+        if (Input.GetKeyDown(teclaPhase) && !estaEnPhase
+            && tiempoRestanteCooldownPhase <= 0f && phaseDisponibleEnEsteNivel)
+        {
+            ActivarPhase();
+        }
+
+        // Terminar: al soltar la tecla O cuando se agota la duración
+        if (estaEnPhase)
+        {
+            tiempoRestantePhase -= Time.deltaTime;
+
+            if (tiempoRestantePhase <= 0f)
+            {
+                DesactivarPhase();
+            }
+        }
+
+        // Pulso leve del glow violeta mientras dura el Phase. Si VidaJugador
+        // está mostrando el flash de daño en este momento, no lo pisamos: se
+        // deja ver el rojo semi-transparente y el glow retoma al terminar.
+        bool hayFlashDeDaño = vidaJugador != null && vidaJugador.EstaParpadeando;
+        if (estaEnPhase && !hayFlashDeDaño)
+        {
+            float pulso = 1f + Mathf.Sin(Time.time * velocidadPulsoGlow) * intensidadPulsoGlow;
+            AplicarColorPhase(pulso);
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (estaDasheando)
+        {
+            rb.linearVelocity = new Vector2(direccionDash * fuerzaDash, 0f);
+        }
+        else
+        {
+            float velActual = estaAgachado ? velocidadAgachado : velocidadMovimiento;
+            rb.linearVelocity = new Vector2(inputHorizontal * velActual, rb.linearVelocity.y);
+        }
+
+        if (quiereSaltar)
+        {
+            float velSalto = fuerzaSalto * Mathf.Sqrt(multiplicadorSubida);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, velSalto);
+            quiereSaltar = false;
+        }
+    }
+
+    private void ActivarPhase()
+    {
+        estaEnPhase = true;
+        tiempoRestantePhase = duracionPhase;
+
+        // Desactiva colisiones con la capa asignada
+        IgnorarColisionesParedes(true);
+
+        // Guarda el color actual de CADA sprite del rig (cabeza, torso, etc.)
+        // para poder restaurarlos tal cual al salir del Phase.
+        if (spriteRenderers != null && spriteRenderers.Length > 0)
+        {
+            coloresOriginalesPhase = new Color[spriteRenderers.Length];
+            for (int i = 0; i < spriteRenderers.Length; i++)
+            {
+                if (spriteRenderers[i] != null)
+                {
+                    Color actual = spriteRenderers[i].color;
+
+                    // Si justo hay un flash de daño en curso, el color actual es el rojo del
+                    // impacto: se guarda el original para no quedar "impactado" al salir del Phase.
+                    coloresOriginalesPhase[i] = (vidaJugador != null && vidaJugador.EstaParpadeando)
+                        ? vidaJugador.ColorOriginal(i, actual)
+                        : actual;
+                }
+            }
+        }
+
+        // Feedback visual: semi-transparente + glow violeta (el pulso se
+        // actualiza cuadro a cuadro en Update mientras estaEnPhase).
+        AplicarColorPhase(1f);
+    }
+
+    private void DesactivarPhase()
+    {
+        estaEnPhase = false;
+
+        // El cooldown arranca acá, sea cual sea el motivo del corte
+        // (soltar la tecla o agotarse la duración).
+        tiempoRestanteCooldownPhase = cooldownPhase;
+
+        // Restablece colisiones
+        IgnorarColisionesParedes(false);
+
+        // Restaura el color y la opacidad que tenía cada sprite antes del Phase.
+        if (spriteRenderers != null && coloresOriginalesPhase != null)
+        {
+            for (int i = 0; i < spriteRenderers.Length && i < coloresOriginalesPhase.Length; i++)
+            {
+                if (spriteRenderers[i] != null)
+                    spriteRenderers[i].color = coloresOriginalesPhase[i];
+            }
+        }
+    }
+
+    // Aplica el color de glow (con el multiplicador de brillo del pulso) a
+    // TODOS los SpriteRenderer del rig, no solo a uno.
+    private void AplicarColorPhase(float multiplicadorBrillo)
+    {
+        if (spriteRenderers == null) return;
+
+        Color colorConGlow = colorGlowPhase * multiplicadorBrillo;
+        colorConGlow.a = opacidadPhase;
+
+        foreach (SpriteRenderer sr in spriteRenderers)
+        {
+            if (sr != null)
+                sr.color = colorConGlow;
+        }
+    }
+
+    private void IgnorarColisionesParedes(bool ignorar)
+    {
+        int playerLayer = gameObject.layer;
+
+        for (int i = 0; i < 32; i++)
+        {
+            if ((capaParedesAtravesables.value & (1 << i)) != 0)
+            {
+                Physics2D.IgnoreLayerCollision(playerLayer, i, ignorar);
+            }
+        }
+    }
+
+    private void AjustarColliderAgachado()
+    {
+        if (boxCollider == null) return;
+
+        if (estaAgachado)
+        {
+            boxCollider.size = new Vector2(tamanoOriginalCollider.x, tamanoOriginalCollider.y * 0.5f);
+            boxCollider.offset = new Vector2(offsetOriginalCollider.x, offsetOriginalCollider.y - (tamanoOriginalCollider.y * 0.25f));
+        }
+        else
+        {
+            boxCollider.size = tamanoOriginalCollider;
+            boxCollider.offset = offsetOriginalCollider;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log("Toqué: " + collision.name);
+
+        if (collision.CompareTag("CabezaEnemigo") && rb.linearVelocity.y <= 0f)
+        {
+            Debug.Log("Detecté cabeza enemigo");
+
+            Rebotar();
+
+            DisparoEnemigo enemigo = collision.GetComponentInParent<DisparoEnemigo>();
+
+            if (enemigo != null)
+            {
+                enemigo.Muere();
+            }
+        }
+    }
+
+    // Publico para que el Repeater lo llame cuando el jugador cae sobre su cuerpo (ver DisparoEnemigo.OnCollisionEnter2D).
+    public void Rebotar()
+    {
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, Rebote);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (detectorSuelo != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(PuntoDeteccionSuelo(), radioDeteccion);
+        }
+    }
+}

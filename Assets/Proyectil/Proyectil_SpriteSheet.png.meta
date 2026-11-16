@@ -1,0 +1,419 @@
+fileFormatVersion: 2
+guid: a813b2c3f76c0d84ea36385b37ceaa6c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1021731600832684694
+    second: Proyectil_SpriteSheet_0
+  - first:
+      213: -3086395664289025571
+    second: Proyectil_SpriteSheet_1
+  - first:
+      213: -8350679927271275052
+    second: Proyectil_SpriteSheet_2
+  - first:
+      213: -6227936228932155616
+    second: Proyectil_SpriteSheet_3
+  - first:
+      213: -7312768202966818298
+    second: Proyectil_SpriteSheet_4
+  - first:
+      213: -6928320335316548678
+    second: Proyectil_SpriteSheet_5
+  - first:
+      213: -7424061763688144782
+    second: Proyectil_SpriteSheet_6
+  - first:
+      213: 6257000538082443616
+    second: Proyectil_SpriteSheet_7
+  - first:
+      213: -4846824563981650707
+    second: Proyectil_SpriteSheet_8
+  - first:
+      213: -7840666918763525231
+    second: Proyectil_SpriteSheet_9
+  - first:
+      213: -2221202141128494495
+    second: Proyectil_SpriteSheet_10
+  - first:
+      213: 1747416722817582933
+    second: Proyectil_SpriteSheet_11
+  - first:
+      213: -8722247207296550077
+    second: Proyectil_SpriteSheet_12
+  - first:
+      213: 2128363831535168258
+    second: Proyectil_SpriteSheet_13
+  - first:
+      213: 7947783027022670323
+    second: Proyectil_SpriteSheet_14
+  - first:
+      213: -3732424766023812427
+    second: Proyectil_SpriteSheet_15
+  - first:
+      213: 7889448414103323880
+    second: Proyectil_SpriteSheet_16
+  - first:
+      213: 1568988328093660541
+    second: Proyectil_SpriteSheet_17
+  - first:
+      213: -8298415425675381398
+    second: Proyectil_SpriteSheet_18
+  - first:
+      213: 4089317528076019016
+    second: Proyectil_SpriteSheet_19
+  - first:
+      213: -8759793932130635154
+    second: Proyectil_SpriteSheet_20
+  - first:
+      213: -5252298558547914685
+    second: Proyectil_SpriteSheet_21
+  - first:
+      213: 5138131396618619074
+    second: Proyectil_SpriteSheet_22
+  - first:
+      213: -3388558863020584988
+    second: Proyectil_SpriteSheet_23
+  - first:
+      213: 5781101025588873264
+    second: Proyectil_SpriteSheet_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Proyectil_SpriteSheet_0
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 261
+        width: 118
+        height: 76
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6926c634a7bed2e00800000000000000
+      internalID: 1021731600832684694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Proyectil_SpriteSheet_1
+      rect:
+        serializedVersion: 2
+        x: 223
+        y: 257
+        width: 271
+        height: 81
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd13fb9ee7bea25d0800000000000000
+      internalID: -3086395664289025571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Proyectil_SpriteSheet_5
+      rect:
+        serializedVersion: 2
+        x: 511
+        y: 257
+        width: 270
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab38753ec59a9df90800000000000000
+      internalID: -6928320335316548678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Proyectil_SpriteSheet_9
+      rect:
+        serializedVersion: 2
+        x: 898
+        y: 215
+        width: 158
+        height: 59
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19b81f0aafa503390800000000000000
+      internalID: -7840666918763525231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Proyectil_SpriteSheet_10
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 156
+        width: 268
+        height: 81
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 162f2bbcb64bc21e0800000000000000
+      internalID: -2221202141128494495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Proyectil_SpriteSheet_15
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 158
+        width: 233
+        height: 75
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5bab7465373c33cc0800000000000000
+      internalID: -3732424766023812427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Proyectil_SpriteSheet_2
+      rect:
+        serializedVersion: 2
+        x: 1070
+        y: 215
+        width: 159
+        height: 59
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6288172dd85ac4344ae00a95ca8ccfc8
+      internalID: -8350679927271275052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Proyectil_SpriteSheet_3
+      rect:
+        serializedVersion: 2
+        x: 1229
+        y: 215
+        width: 179
+        height: 59
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 789827d5daf6a7e4aaba52c95cd5093f
+      internalID: -6227936228932155616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Proyectil_SpriteSheet_0: 1021731600832684694
+      Proyectil_SpriteSheet_1: -3086395664289025571
+      Proyectil_SpriteSheet_10: -2221202141128494495
+      Proyectil_SpriteSheet_11: 1747416722817582933
+      Proyectil_SpriteSheet_12: -8722247207296550077
+      Proyectil_SpriteSheet_13: 2128363831535168258
+      Proyectil_SpriteSheet_14: 7947783027022670323
+      Proyectil_SpriteSheet_15: -3732424766023812427
+      Proyectil_SpriteSheet_16: 7889448414103323880
+      Proyectil_SpriteSheet_17: 1568988328093660541
+      Proyectil_SpriteSheet_18: -8298415425675381398
+      Proyectil_SpriteSheet_19: 4089317528076019016
+      Proyectil_SpriteSheet_2: -8350679927271275052
+      Proyectil_SpriteSheet_20: -8759793932130635154
+      Proyectil_SpriteSheet_21: -5252298558547914685
+      Proyectil_SpriteSheet_22: 5138131396618619074
+      Proyectil_SpriteSheet_23: -3388558863020584988
+      Proyectil_SpriteSheet_24: 5781101025588873264
+      Proyectil_SpriteSheet_3: -6227936228932155616
+      Proyectil_SpriteSheet_4: -7312768202966818298
+      Proyectil_SpriteSheet_5: -6928320335316548678
+      Proyectil_SpriteSheet_6: -7424061763688144782
+      Proyectil_SpriteSheet_7: 6257000538082443616
+      Proyectil_SpriteSheet_8: -4846824563981650707
+      Proyectil_SpriteSheet_9: -7840666918763525231
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

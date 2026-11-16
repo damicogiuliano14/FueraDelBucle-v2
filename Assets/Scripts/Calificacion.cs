@@ -1,0 +1,230 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class Calificacion : MonoBehaviour
+{
+    public const string ClaveHistoria = "CalificacionHistoria";
+    public const string ClaveArte = "CalificacionArte";
+    public const string ClaveJugabilidad = "CalificacionJugabilidad";
+    public const string ClaveEnviada = "CalificacionEnviada";
+
+    [Header("Estrellas de cada categoria, de izquierda a derecha")]
+    public Image[] estrellasHistoria;
+    public Image[] estrellasArte;
+    public Image[] estrellasJugabilidad;
+
+    [Header("Colores de las estrellas")]
+    public Color colorLlena = new Color(1f, 0.72f, 0.15f);
+    public Color colorVacia = new Color(0.78f, 0.84f, 0.9f);
+
+    [Header("Que se muestra al enviar")]
+    public GameObject botonEnviar;
+    public GameObject textoGracias;
+
+    [Header("Que pasa al cerrar")]
+    [Tooltip("Vacio: la ventana se oculta. Con el nombre de una escena: la carga.")]
+    public string escenaAlCerrar = "";
+
+    [Tooltip("Si venis de una de estas escenas, Volver usa escenaAlCerrar en lugar de volver a donde estabas.")]
+    public string[] escenasSinVuelta = { "Final", "AnimFinal" };
+
+    private static string escenaActual = "";
+    private static string escenaAnterior = "";
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    private static void SeguirLasEscenas()
+    {
+        escenaActual = SceneManager.GetActiveScene().name;
+        escenaAnterior = "";
+
+        SceneManager.sceneLoaded -= AnotarEscena;
+        SceneManager.sceneLoaded += AnotarEscena;
+    }
+
+    private static void AnotarEscena(Scene escena, LoadSceneMode modo)
+    {
+        if (modo != LoadSceneMode.Single) return;
+
+        escenaAnterior = escenaActual;
+        escenaActual = escena.name;
+    }
+
+    private int historia;
+    private int arte;
+    private int jugabilidad;
+
+    private bool yaEnviada;
+    private int historiaEnviada;
+    private int arteEnviada;
+    private int jugabilidadEnviada;
+
+    void OnEnable()
+    {
+        historia = PlayerPrefs.GetInt(ClaveHistoria, 0);
+        arte = PlayerPrefs.GetInt(ClaveArte, 0);
+        jugabilidad = PlayerPrefs.GetInt(ClaveJugabilidad, 0);
+        yaEnviada = PlayerPrefs.GetInt(ClaveEnviada, 0) == 1;
+
+        historiaEnviada = historia;
+        arteEnviada = arte;
+        jugabilidadEnviada = jugabilidad;
+
+        Pintar();
+        ActualizarBoton();
+    }
+
+    public void PonerHistoria(int puntaje)
+    {
+        historia = Alternar(historia, puntaje);
+        Pintar();
+        ActualizarBoton();
+    }
+
+    public void PonerArte(int puntaje)
+    {
+        arte = Alternar(arte, puntaje);
+        Pintar();
+        ActualizarBoton();
+    }
+
+    public void PonerJugabilidad(int puntaje)
+    {
+        jugabilidad = Alternar(jugabilidad, puntaje);
+        Pintar();
+        ActualizarBoton();
+    }
+
+    public void BorrarHistoria()
+    {
+        historia = 0;
+        Pintar();
+        ActualizarBoton();
+    }
+
+    public void BorrarArte()
+    {
+        arte = 0;
+        Pintar();
+        ActualizarBoton();
+    }
+
+    public void BorrarJugabilidad()
+    {
+        jugabilidad = 0;
+        Pintar();
+        ActualizarBoton();
+    }
+
+    public void BorrarTodo()
+    {
+        historia = 0;
+        arte = 0;
+        jugabilidad = 0;
+        Pintar();
+        ActualizarBoton();
+    }
+
+    public void Enviar()
+    {
+        PlayerPrefs.SetInt(ClaveHistoria, historia);
+        PlayerPrefs.SetInt(ClaveArte, arte);
+        PlayerPrefs.SetInt(ClaveJugabilidad, jugabilidad);
+        PlayerPrefs.SetInt(ClaveEnviada, 1);
+        PlayerPrefs.Save();
+
+        yaEnviada = true;
+        historiaEnviada = historia;
+        arteEnviada = arte;
+        jugabilidadEnviada = jugabilidad;
+
+        RegistrarEventoRate();
+        ActualizarBoton();
+    }
+
+    // Evento "Rate" de la hoja de diseno de eventos: se manda una vez, al apretar el boton de enviar la calificacion.
+    // Equivalencias con la hoja: lore = historia, art = arte, fun = jugabilidad (la hoja los define de 1 a 5; 0 = sin calificar).
+    // Decision del equipo: se registra siempre que se aprieta enviar, aunque haya categorias en 0.
+    // El log y el envio a Unity Analytics estan en Eventos.LogRate, como el resto de los eventos.
+    private void RegistrarEventoRate()
+    {
+        Eventos.LogRate(historia, arte, jugabilidad);
+    }
+
+    public void Cerrar()
+    {
+        string destino = ElegirDestino();
+
+        if (string.IsNullOrEmpty(destino))
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(destino);
+    }
+
+    private string ElegirDestino()
+    {
+        if (string.IsNullOrEmpty(escenaAlCerrar)) return "";
+        if (string.IsNullOrEmpty(escenaAnterior)) return escenaAlCerrar;
+
+        if (escenasSinVuelta != null)
+        {
+            for (int i = 0; i < escenasSinVuelta.Length; i++)
+            {
+                if (escenaAnterior == escenasSinVuelta[i]) return escenaAlCerrar;
+            }
+        }
+
+        return escenaAnterior;
+    }
+
+    private int Alternar(int actual, int puntaje)
+    {
+        int nuevo = Mathf.Clamp(puntaje, 0, 5);
+        return (nuevo == actual) ? 0 : nuevo;
+    }
+
+    private bool HayCambio()
+    {
+        return historia != historiaEnviada
+            || arte != arteEnviada
+            || jugabilidad != jugabilidadEnviada;
+    }
+
+    private void ActualizarBoton()
+    {
+        bool mostrarEnviar = !yaEnviada || HayCambio();
+
+        if (botonEnviar != null)
+        {
+            botonEnviar.SetActive(mostrarEnviar);
+        }
+
+        if (textoGracias != null)
+        {
+            textoGracias.SetActive(yaEnviada && !mostrarEnviar);
+        }
+    }
+
+    private void Pintar()
+    {
+        PintarFila(estrellasHistoria, historia);
+        PintarFila(estrellasArte, arte);
+        PintarFila(estrellasJugabilidad, jugabilidad);
+    }
+
+    private void PintarFila(Image[] fila, int puntaje)
+    {
+        if (fila == null) return;
+
+        for (int i = 0; i < fila.Length; i++)
+        {
+            if (fila[i] == null) continue;
+
+            fila[i].color = (i < puntaje) ? colorLlena : colorVacia;
+        }
+    }
+}
